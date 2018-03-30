@@ -1,0 +1,28 @@
+{
+  "name": "colletch",
+  "version": "0.0.1.beta.1",
+  "description": "A collection of etch components for atom",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "atom",
+    "etch",
+    "view",
+    "window",
+    "element",
+    "dom"
+  ],
+  "author": "Owen Parry",
+  "license": "MIT",
+  "dependencies": {
+    "etch": ">=0.13.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.5.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-react": "^7.3.0"
+  }
+}
