@@ -23,12 +23,23 @@ const buildHierarchy = (children, parent) => {
 export default class EtchTreeNode extends EtchComponent
 {
   constructor (props, children, options) {
+    let doubleClickHandler = null
+
+    if (props.on && props.on.dblclick) {
+      doubleClickHandler = props.on.dblclick
+      delete props.on.dblclick
+    }
+
     super(props, children, options)
 
     this[symbols.self].childNodes = buildHierarchy(children, this)
 
     if (typeof props.onDidSelect === 'function') {
       this.on('select', props.onDidSelect)
+    }
+
+    if (typeof doubleClickHandler === 'function') {
+      this.on('dblclick', doubleClickHandler)
     }
   }
 
@@ -111,7 +122,18 @@ export default class EtchTreeNode extends EtchComponent
       this.setSelected(!this[symbols.self].properties.selected)
       this[symbols.emit]('select', this)
     } else {
-      this.setCollapsed(!this[symbols.self].properties.collapsed)
+      if (this.clicked) {
+        this.clicked = false
+        this[symbols.emit]('dblclick', event)
+      } else {
+        this.clicked = true
+        window.setTimeout(() => { // eslint-disable-line no-undef
+          if (this.clicked) {
+            this.clicked = false
+            this.setCollapsed(!this[symbols.self].properties.collapsed)
+          }
+        }, 300)
+      }
     }
   }
 

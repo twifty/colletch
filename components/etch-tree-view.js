@@ -48,10 +48,20 @@ export default class EtchTreeView extends EtchComponent
       'etch-tree list-tree has-collapsable-children'
     )
 
+    const onKeyDown = (event) => {
+      if (event.ctrlKey) {
+        this.refs.tree.classList.add('is-selecting')
+      } else {
+        this.refs.tree.classList.remove('is-selecting')
+      }
+    }
+
     return (
       <ul
         className={ className }
         style={ this[symbols.getStyle]() }
+        ref="tree"
+        onMouseMove={ onKeyDown }
       >{ this[symbols.self].children }</ul>
     )
   }

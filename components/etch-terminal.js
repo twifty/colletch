@@ -8,6 +8,8 @@ import EtchComponent from './etch-component'
 import symbols from './symbols'
 
 const createNewLine = Symbol()
+const createInput = Symbol()
+const appendToLine = Symbol()
 const buildAttributes = Symbol()
 const createLineData = Symbol()
 const setState = Symbol()
@@ -126,6 +128,14 @@ export default class EtchTerminal extends EtchComponent
     if (this[symbols.self].properties.onPreRenderLine) {
       this.on('pre-render-line', this[symbols.self].properties.onPreRenderLine)
     }
+
+    if (this[symbols.self].properties.onInput) {
+      this.on('input', this[symbols.self].properties.onInput)
+    }
+  }
+
+  update () {
+    return Promise.resolve()
   }
 
   clear () {
@@ -135,6 +145,10 @@ export default class EtchTerminal extends EtchComponent
 
       etch.updateSync(this)
     })
+  }
+
+  focus () {
+    this[symbols.self].input.focus()
   }
 
   write (data) {
@@ -158,6 +172,7 @@ export default class EtchTerminal extends EtchComponent
         }
       })
       etch.updateSync(this)
+      this.focus()
     })
   }
 
@@ -182,6 +197,21 @@ export default class EtchTerminal extends EtchComponent
     return selection
   }
 
+  pasteContent (data) {
+    // Care needs to be taken when data contains newlines. They should invoke an
+    // 'Enter'
+    const lines = data.split('\n')
+
+    for (let i = 0; i < lines.length - 1; i++) {
+      const text = lines[i]
+
+      // TODO should we append this to current line?
+      this[symbols.emit]('input', text + '\n')
+    }
+
+    this[symbols.self].input.value = lines[ lines.length - 1 ]
+  }
+
   selectAll () {
     const selection = window.getSelection()
     selection.removeAllRanges()
@@ -193,14 +223,12 @@ export default class EtchTerminal extends EtchComponent
   render () {
     return (
       <ul
-        className={ this[symbols.getClassName]('etch-term native-key-bindings', 'native-key-bindings') }
+        className={ this[symbols.getClassName]('etch-term', 'native-key-bindings') }
         tabIndex="-1"
-      >{ this[symbols.self].lines }</ul>
+      >
+        { this[symbols.self].lines }
+      </ul>
     )
-  }
-
-  update () {
-    return Promise.resolve()
   }
 
   [symbols.initialize] () {
@@ -224,8 +252,44 @@ export default class EtchTerminal extends EtchComponent
   [resetData] () {
     this[symbols.self].lines = []
     this[symbols.self].buffer = ''
+    this[symbols.self].currLine = null
+    this[symbols.self].input = null
 
     Object.assign(this[symbols.self], DEFAULT_STATE)
+  }
+
+  [createInput] () {
+    const onKeyPress = (event) => {
+      if ('Enter' === event.key) {
+        const element = event.target
+        const text = element.value
+
+        element.value = ''
+
+        this[symbols.emit]('input', text + '\n')
+      }
+
+      if ('c' === event.key && event.ctrlKey) {
+        event.preventDefault()
+        this[symbols.emit]('signal', 'SIGKILL')
+      }
+    }
+
+    const input = document.createElement('input')
+    const span = document.createElement('span')
+
+    input.type = 'text'
+    input.className = 'etch-term-input'
+    input.addEventListener('keydown', onKeyPress)
+
+    // span.addEventListener('focus', () => {input.focus()})
+    span.appendChild(input)
+    span.style.flex = 1
+    // span.tabIndex = -1
+
+    this[symbols.self].input = input
+
+    return span
   }
 
   [createNewLine] () {
@@ -240,6 +304,12 @@ export default class EtchTerminal extends EtchComponent
       line.style[name] = styles[name]
     }
 
+    if (!this[symbols.self].currLine) {
+      line.appendChild(this[createInput]())
+    } else {
+      line.appendChild(this[symbols.self].currLine.lastChild)
+    }
+
     this[symbols.self].currLineState = attributes
     this[symbols.self].currLineIndex = this[symbols.self].lines.length
     this[symbols.self].currLine = line
@@ -248,6 +318,10 @@ export default class EtchTerminal extends EtchComponent
       // NOTE unbound functions have their own 'this'
       this.element = line
     }})
+  }
+
+  [appendToLine] (span) {
+    this[symbols.self].currLine.insertBefore(span, this[symbols.self].currLine.lastChild)
   }
 
   [buildAttributes] ({background = null, foreground = null} = {}) {
@@ -319,7 +393,7 @@ export default class EtchTerminal extends EtchComponent
       span.style[name] = styles[name]
     }
 
-    this[symbols.self].currLine.appendChild(span)
+    this[appendToLine](span)
   }
 
   [setState] (token) {
