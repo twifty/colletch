@@ -9,85 +9,84 @@ import symbols from './symbols'
 
 export default class EtchFlexSplitter extends EtchComponent
 {
-  [symbols.initialize] () {
-    this[symbols.self].emitter = this[symbols.self].properties.emitter || {emit: () => {}}
-    this[symbols.self].state = {
-      active: false
-    }
-  }
+	[symbols.initialize] () {
+		this[symbols.self].emitter = this[symbols.self].properties.emitter || {
+			emit: () => {}
+		}
+		this[symbols.self].state = {
+			active: false
+		}
+	}
 
-  [symbols.getDefaultProperties] () {
-    return {
-      propagate: false,
-      className: '',
-      style: {}
-    }
-  }
+	[symbols.getDefaultProperties] () {
+		return {propagate: false, className: '', style: {}}
+	}
 
-  onMouseDown (event) {
-    this[symbols.self].state.active = true
+	onMouseDown (event) {
+		this[symbols.self].state.active = true
 
-    const mouseMove = (event) => {
-      return this.onMouseMove(event)
-    }
+		const mouseMove = (event) => {
+			return this.onMouseMove(event)
+		}
 
-    const mouseUp = (event) => {
-      document.removeEventListener('mousemove', mouseMove)
-      document.removeEventListener('mouseup', mouseUp)
-      document.body.style.cursor = 'auto'
+		const mouseUp = (event) => {
+			document.removeEventListener('mousemove', mouseMove)
+			document.removeEventListener('mouseup', mouseUp)
+			document.body.style.cursor = 'auto'
 
-      return this.onMouseUp(event)
-    }
+			return this.onMouseUp(event)
+		}
 
-    document.body.style.cursor = this[symbols.self].properties.orientation === 'vertical' ? 'col-resize' : 'row-resize'
+		document.body.style.cursor = this[symbols.self].properties.orientation === 'vertical'
+			? 'col-resize'
+			: 'row-resize'
 
-    document.addEventListener('mouseup', mouseUp)
-    document.addEventListener('mousemove', mouseMove, {
-      passive: false
-    })
+		document.addEventListener('mouseup', mouseUp)
+		document.addEventListener('mousemove', mouseMove, {passive: false})
 
-    this[symbols.self].emitter.emit('splitter.startResize', {
-      index: this[symbols.self].properties.index,
-      event
-    })
-  }
+		this[symbols.self].emitter.emit('splitter.startResize', {
+			index: this[symbols.self].properties.index,
+			event
+		})
+	}
 
-  onMouseMove (event) {
-    if (this[symbols.self].state.active) {
-      this[symbols.self].emitter.emit('splitter.resize', {
-        index: this[symbols.self].properties.index,
-        event
-      })
+	onMouseMove (event) {
+		if (this[symbols.self].state.active) {
+			this[symbols.self].emitter.emit('splitter.resize', {
+				index: this[symbols.self].properties.index,
+				event
+			})
 
-      event.stopPropagation()
-      event.preventDefault()
-    }
-  }
+			event.stopPropagation()
+			event.preventDefault()
+		}
+	}
 
-  onMouseUp (event) {
-    if (this[symbols.self].state.active) {
-      this[symbols.self].state.active = false
+	onMouseUp (event) {
+		if (this[symbols.self].state.active) {
+			this[symbols.self].state.active = false
 
-      this[symbols.self].emitter.emit('splitter.stopResize', {
-        index: this[symbols.self].properties.index,
-        event
-      })
-    }
-  }
+			this[symbols.self].emitter.emit('splitter.stopResize', {
+				index: this[symbols.self].properties.index,
+				event
+			})
+		}
+	}
 
-  update () {
-    return Promise.resolve()
-  }
+	update () {
+		return Promise.resolve()
+	}
 
-  render () {
-    const active = this[symbols.self].state.active ? 'active' : null
+	render () {
+		const active = this[symbols.self].state.active
+			? 'active'
+			: null
 
-    return (
-      <div
-        className={ this[symbols.getClassName]('etch-flex-splitter', active) }
-        style={ this[symbols.getStyle]() }
-        on={{ mousedown: this.onMouseDown }} >
-      </div>
-    )
-  }
+		return (
+			<div className={ this[symbols.getClassName]('etch-flex-splitter', active) }
+				 style={ this[symbols.getStyle]() }
+				 on={ {mousedown: this.onMouseDown} }
+			/>
+		)
+	}
 }

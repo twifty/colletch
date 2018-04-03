@@ -7,191 +7,193 @@ import EtchComponent from './etch-component'
 import symbols from './symbols'
 
 const buildHierarchy = (children, parent) => {
-  const childNodes = []
+	const childNodes = []
 
-  children.forEach((child) => {
-    if (child.tag === EtchTreeNode) {
-      child.component[symbols.self].parentNode = parent
+	children.forEach((child) => {
+		if (child.tag === EtchTreeNode) {
+			child.component[symbols.self].parentNode = parent
 
-      childNodes.push(child.component)
-    }
-  })
+			childNodes.push(child.component)
+		}
+	})
 
-  return childNodes
+	return childNodes
 }
 
 export default class EtchTreeNode extends EtchComponent
 {
-  constructor (props, children, options) {
-    let doubleClickHandler = null
+	constructor (props, children, options) {
+		let doubleClickHandler = null
 
-    if (props.on && props.on.dblclick) {
-      doubleClickHandler = props.on.dblclick
-      delete props.on.dblclick
-    }
+		if (props.on && props.on.dblclick) {
+			doubleClickHandler = props.on.dblclick
+			delete props.on.dblclick
+		}
 
-    super(props, children, options)
+		super(props, children, options)
 
-    this[symbols.self].childNodes = buildHierarchy(children, this)
+		this[symbols.self].childNodes = buildHierarchy(children, this)
 
-    if (typeof props.onDidSelect === 'function') {
-      this.on('select', props.onDidSelect)
-    }
+		if (typeof props.onDidSelect === 'function') {
+			this.on('select', props.onDidSelect)
+		}
 
-    if (typeof doubleClickHandler === 'function') {
-      this.on('dblclick', doubleClickHandler)
-    }
-  }
+		if (typeof doubleClickHandler === 'function') {
+			this.on('dblclick', doubleClickHandler)
+		}
+	}
 
-  update (props, children) {
-    return super.update(props, children).then(() => {
-      this[symbols.self].childNodes = buildHierarchy(children, this)
-    })
-  }
+	update (props, children) {
+		return super.update(props, children).then(() => {
+			this[symbols.self].childNodes = buildHierarchy(children, this)
+		})
+	}
 
-  onDidSelect (cb) {
-    return this.on('select', cb)
-  }
+	onDidSelect (cb) {
+		return this.on('select', cb)
+	}
 
-  getChildNodes () {
-    return this[symbols.self].childNodes
-  }
+	getChildNodes () {
+		return this[symbols.self].childNodes
+	}
 
-  getParentNode () {
-    return this[symbols.self].parentNode
-  }
+	getParentNode () {
+		return this[symbols.self].parentNode
+	}
 
-  setSelected (selected) {
-    if (selected !== this[symbols.self].properties.selected) {
-      this[symbols.self].properties.selected = selected
+	setSelected (selected) {
+		if (selected !== this[symbols.self].properties.selected) {
+			this[symbols.self].properties.selected = selected
 
-      this[symbols.scheduleUpdate](() => {
-        if (selected) {
-          this.element.classList.add('selected')
-        } else {
-          this.element.classList.remove('selected')
-        }
-      })
-    }
-  }
+			this[symbols.scheduleUpdate](() => {
+				if (selected) {
+					this.element.classList.add('selected')
+				} else {
+					this.element.classList.remove('selected')
+				}
+			})
+		}
+	}
 
-  setCollapsed (collapsed) {
-    if (collapsed !== this[symbols.self].properties.collapsed) {
-      this[symbols.self].properties.collapsed = collapsed
+	setCollapsed (collapsed) {
+		if (collapsed !== this[symbols.self].properties.collapsed) {
+			this[symbols.self].properties.collapsed = collapsed
 
-      this[symbols.scheduleUpdate](() => {
-        if (this[symbols.self].properties.collapsed) {
-          this.element.classList.add('collapsed')
-          this.element.classList.remove('expanded')
-        } else {
-          this.element.classList.add('expanded')
-          this.element.classList.remove('collapsed')
-        }
-      })
-    }
-  }
+			this[symbols.scheduleUpdate](() => {
+				if (this[symbols.self].properties.collapsed) {
+					this.element.classList.add('collapsed')
+					this.element.classList.remove('expanded')
+				} else {
+					this.element.classList.add('expanded')
+					this.element.classList.remove('collapsed')
+				}
+			})
+		}
+	}
 
-  setDisabled (disabled) {
-    if (disabled !== this[symbols.self].properties.disabled) {
-      this[symbols.self].properties.disabled = disabled
+	setDisabled (disabled) {
+		if (disabled !== this[symbols.self].properties.disabled) {
+			this[symbols.self].properties.disabled = disabled
 
-      this[symbols.scheduleUpdate](() => {
-        if (this[symbols.self].properties.disabled) {
-          this.element.setAttribute('disabled', true)
-        } else {
-          this.element.removeAttribute('disabled')
-        }
-      })
-    }
-  }
+			this[symbols.scheduleUpdate](() => {
+				if (this[symbols.self].properties.disabled) {
+					this.element.setAttribute('disabled', true)
+				} else {
+					this.element.removeAttribute('disabled')
+				}
+			})
+		}
+	}
 
-  isSelected () {
-    return !!this[symbols.self].properties.selected
-  }
+	isSelected () {
+		return !!this[symbols.self].properties.selected
+	}
 
-  isCollapsed () {
-    return !!this[symbols.self].properties.collapsed
-  }
+	isCollapsed () {
+		return !!this[symbols.self].properties.collapsed
+	}
 
-  isDisabled () {
-    return !!this[symbols.self].properties.disabled
-  }
+	isDisabled () {
+		return !!this[symbols.self].properties.disabled
+	}
 
-  onClick (event) {
-    if (event.ctrlKey) {
-      this.setSelected(!this[symbols.self].properties.selected)
-      this[symbols.emit]('select', this)
-    } else {
-      if (this.clicked) {
-        this.clicked = false
-        this[symbols.emit]('dblclick', event)
-      } else {
-        this.clicked = true
-        window.setTimeout(() => { // eslint-disable-line no-undef
-          if (this.clicked) {
-            this.clicked = false
-            this.setCollapsed(!this[symbols.self].properties.collapsed)
-          }
-        }, 300)
-      }
-    }
-  }
+	onClick (event) {
+		if (event.ctrlKey) {
+			this.setSelected(!this[symbols.self].properties.selected)
+			this[symbols.emit]('select', this)
+		} else {
+			if (this.clicked) {
+				this.clicked = false
+				this[symbols.emit]('dblclick', event)
+			} else {
+				this.clicked = true
+				window.setTimeout(() => { // eslint-disable-line no-undef
+					if (this.clicked) {
+						this.clicked = false
+						this.setCollapsed(!this[symbols.self].properties.collapsed)
+					}
+				}, 300)
+			}
+		}
+	}
 
-  render () {
-    var itemData = null
-    var children = null
+	render () {
+		var itemData = null
+		var children = null
 
-    const itemIcon = this[symbols.self].properties.icon ? (<span className={ 'icon ' + this[symbols.self].properties.icon }></span>) : null
+		const itemIcon = this[symbols.self].properties.icon
+			? (<span className={'icon ' + this[symbols.self].properties.icon}></span>)
+			: null
 
-    // If a value was not supplied as a property, use the first child
-    if (this[symbols.self].properties.value) {
-      children = this[symbols.self].children
-      itemData = (
-        <span>
-          { itemIcon }
-          { this[symbols.self].properties.value || '' }
-        </span>
-      )
-    } else if (this[symbols.self].children.length) {
-      children = this[symbols.self].children.slice(1)
-      itemData = (
-        <span>
-          { itemIcon }
-          { this[symbols.self].children[0] }
-        </span>
-      )
-    } else {
-      return (<div />)
-    }
+		// If a value was not supplied as a property, use the first child
+		if (this[symbols.self].properties.value) {
+			children = this[symbols.self].children
+			itemData = (
+				<span>
+					{ itemIcon }
+					{ this[symbols.self].properties.value || '' }
+				</span>
+			)
+		} else if (this[symbols.self].children.length) {
+			children = this[symbols.self].children.slice(1)
+			itemData = (
+				<span>
+					{ itemIcon }
+					{ this[symbols.self].children[0] }
+				</span>
+			)
+		} else {
+			return (<div/>)
+		}
 
-    if (children.length) {
-      const className = this[symbols.getClassName](
-        'list-nested-item',
-        this[symbols.self].properties.collapsed ? 'collapsed' : 'expanded',
-        this[symbols.self].properties.selected ? 'selected' : null
-      )
+		if (children.length) {
+			const className = this[symbols.getClassName](
+				'list-nested-item',
+				this[symbols.self].properties.collapsed ? 'collapsed' : 'expanded',
+				this[symbols.self].properties.selected ? 'selected' : null
+			)
 
-      return (
-        <li className={ className }>
-          <div className="list-item" onClick={ this.onClick }>
-            { itemData }
-          </div>
-          <ul className="list-tree">
-            { children }
-          </ul>
-        </li>
-      )
-    } else {
-      const className = this[symbols.getClassName](
-        'list-item',
-        this[symbols.self].properties.selected ? 'selected' : null
-      )
+			return (
+				<li className={ className }>
+					<div className="list-item" onClick={this.onClick}>
+						{ itemData }
+					</div>
+					<ul className="list-tree">
+						{ children }
+					</ul>
+				</li>
+			)
+		} else {
+			const className = this[symbols.getClassName](
+				'list-item',
+				 this[symbols.self].properties.selected ? 'selected' : null
+			 )
 
-      return (
-        <li className={ className } onClick={ this.onClick }>
-          { itemData }
-        </li>
-      )
-    }
-  }
+			return (
+				<li className={ className } onClick={ this.onClick }>
+					{ itemData }
+				</li>
+			)
+		}
+	}
 }

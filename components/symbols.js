@@ -2,27 +2,27 @@
 /* global Symbol */
 
 export default {
-  self: Symbol(),
+	self: Symbol(),
 
-  state: Symbol(),
+	state: Symbol(),
 
-  initialize: Symbol(),
+	initialize: Symbol(),
 
-  listen: Symbol(),
+	listen: Symbol(),
 
-  emit: Symbol(),
+	emit: Symbol(),
 
-  addEventListeners: Symbol(),
+	addEventListeners: Symbol(),
 
-  addDataSet: Symbol(),
+	addDataSet: Symbol(),
 
-  scheduleUpdate: Symbol(),
+	scheduleUpdate: Symbol(),
 
-  getStyle: Symbol(),
+	getStyle: Symbol(),
 
-  getClassNames: Symbol(),
+	getClassNames: Symbol(),
 
-  getClassName: Symbol(),
+	getClassName: Symbol(),
 
-  getDefaultProperties: Symbol(),
+	getDefaultProperties: Symbol()
 }
