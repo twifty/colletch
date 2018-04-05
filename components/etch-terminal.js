@@ -157,7 +157,9 @@ export default class EtchTerminal extends EtchComponent
 	}
 
 	focus () {
-		this[symbols.self].input.focus()
+		if (this[symbols.self].properties.enableInput) {
+			this[symbols.self].input.focus()
+		}
 	}
 
 	write (data) {
@@ -207,6 +209,10 @@ export default class EtchTerminal extends EtchComponent
 	}
 
 	pasteContent (data) {
+		if (!this[symbols.self].properties.enableInput) {
+			return
+		}
+
 		// Care needs to be taken when data contains newlines. They should invoke an
 		// 'Enter'
 		const lines = data.split('\n')
@@ -252,6 +258,12 @@ export default class EtchTerminal extends EtchComponent
 					this.element.classList.add('has-selection')
 				}
 			}
+		}
+	}
+
+	[symbols.getDefaultProperties] () {
+		return {
+			enableInput: true
 		}
 	}
 
@@ -310,10 +322,12 @@ export default class EtchTerminal extends EtchComponent
 			line.style[name] = styles[name]
 		}
 
-		if (!this[symbols.self].currLine) {
-			line.appendChild(this[createInput]())
-		} else {
-			line.appendChild(this[symbols.self].currLine.lastChild)
+		if (this[symbols.self].properties.enableInput) {
+			if (!this[symbols.self].currLine) {
+				line.appendChild(this[createInput]())
+			} else {
+				line.appendChild(this[symbols.self].currLine.lastChild)
+			}
 		}
 
 		this[symbols.self].currLineState = attributes
@@ -329,7 +343,11 @@ export default class EtchTerminal extends EtchComponent
 	}
 
 	[appendToLine] (span) {
-		this[symbols.self].currLine.insertBefore(span, this[symbols.self].currLine.lastChild)
+		if (this[symbols.self].properties.enableInput) {
+			this[symbols.self].currLine.insertBefore(span, this[symbols.self].currLine.lastChild)
+		} else {
+			this[symbols.self].currLine.appendChild(span)
+		}
 	}
 
 	[buildAttributes] ({background = null, foreground = null} = {}) {
