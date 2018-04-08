@@ -37,7 +37,7 @@ export default class EtchFlexSplitter extends EtchComponent
 			return this.onMouseUp(event)
 		}
 
-		document.body.style.cursor = this[symbols.self].properties.orientation === 'vertical'
+		document.body.style.cursor = this[symbols.self].properties.orientation === 'horizontal'
 			? 'col-resize'
 			: 'row-resize'
 
@@ -84,8 +84,8 @@ export default class EtchFlexSplitter extends EtchComponent
 
 		return (
 			<div className={ this[symbols.getClassName]('etch-flex-splitter', active) }
-				 style={ this[symbols.getStyle]() }
-				 on={ {mousedown: this.onMouseDown} }
+				style={ this[symbols.getStyle]() }
+				on={ {mousedown: this.onMouseDown} }
 			/>
 		)
 	}

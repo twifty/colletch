@@ -89,7 +89,11 @@ export default class EtchFlexContainer extends EtchComponent
 	}
 
 	[symbols.getDefaultProperties] () {
-		return {orientation: 'horizontal', className: '', style: {}}
+		return {
+			orientation: 'horizontal',
+			className: '',
+			style: {}
+		}
 	}
 
 	[configureChildrensProps] () {
@@ -106,14 +110,14 @@ export default class EtchFlexContainer extends EtchComponent
 	}
 
 	[onSplitterStartResize] (data) {
-		this[symbols.self].previousPos = this[symbols.self].properties.orientation === 'vertical'
+		this[symbols.self].previousPos = this[symbols.self].properties.orientation === 'horizontal'
 			? data.event.pageX
 			: data.event.pageY
 	}
 
 	[onSplitterResize] (data) {
 		if (this[symbols.self].flexData[data.index]) {
-			const pos = this[symbols.self].properties.orientation === 'vertical'
+			const pos = this[symbols.self].properties.orientation === 'horizontal'
 				? data.event.pageX
 				: data.event.pageY
 			const availableOffset = this[computeAvailableOffset](data.index, pos - this[symbols.self].previousPos)
@@ -145,7 +149,7 @@ export default class EtchFlexContainer extends EtchComponent
 	}
 
 	[getSize] (child) {
-		if (this[symbols.self].properties.orientation === 'vertical') {
+		if (this[symbols.self].properties.orientation === 'horizontal') {
 			return child.domNode.offsetWidth
 		}
 
@@ -297,6 +301,10 @@ export default class EtchFlexContainer extends EtchComponent
 	}
 
 	[computeFlexData] () {
+		if (this[symbols.self].flexData && this[symbols.self].flexData.length === this[symbols.self].children.length) {
+			return this[symbols.self].flexData
+		}
+
 		const pixelFlex = this[computePixelFlex]()
 
 		const computeFreeFlex = (flexData) => {
@@ -317,16 +325,15 @@ export default class EtchFlexContainer extends EtchComponent
 			}, 0)
 		}
 
-		const flexDataInit = this[symbols.self].children.map((child, idx) => {
+		const flexDataInit = this[symbols.self].children.map((child) => {
 			const props = child.props || {}
-			const flex = (this[symbols.state][idx] && this[symbols.state][idx].flex) || props.flex
 
 			return {
 				maxFlex: (props.maxSize || Number.MAX_VALUE) * pixelFlex,
 				sizeFlex: (props.size || Number.MAX_VALUE) * pixelFlex,
 				minFlex: (props.minSize || 1) * pixelFlex,
-				constrained: flex !== undefined,
-				flex: flex || 0,
+				constrained: props.flex !== undefined,
+				flex: props.flex || 0,
 				isSplitter: child.tag === EtchFlexSplitter
 			}
 		})

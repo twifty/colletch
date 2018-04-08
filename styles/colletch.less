@@ -41,11 +41,11 @@
     width: 100%;
 
     &.horizontal {
-      flex-direction: column;
+      flex-direction: row;
     }
 
     &.vertical {
-      flex-direction: row;
+      flex-direction: column;
     }
   }
 
@@ -71,7 +71,7 @@
     height: 100%;
   }
 
-  &.horizontal > .etch-flex-splitter {
+  &.vertical > .etch-flex-splitter {
     border-bottom: 1px solid @base-border-color;
     border-top: 1px solid @base-border-color;
     cursor: row-resize;
@@ -84,7 +84,7 @@
     }
   }
 
-  &.vertical > .etch-flex-splitter {
+  &.horizontal > .etch-flex-splitter {
     border-right: 1px solid @base-border-color;
     border-left: 1px solid @base-border-color;
     cursor: col-resize;
@@ -222,6 +222,8 @@
 		max-height: 200px;
 		overflow-y: auto;
 		z-index: 200;
+		width: auto;
+		min-width: initial;
 
 		.list-group {
 			margin: 0;
@@ -230,7 +232,7 @@
 		}
 	}
 
-	&:hover > .select-list {
+	&:hover:not([disabled]) > .select-list {
 		display: block;
 	}
 }

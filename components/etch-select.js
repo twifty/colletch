@@ -14,17 +14,16 @@ const renderOptions = Symbol()
 
 export default class EtchSelect extends EtchComponent
 {
-	[symbols.initialize] (props) {
-		this.keyValueMap = {}
-		this.currentSelection = null
-		this.changeHandler = props.onDidSelectionChange || (() => {})
-	}
-
-	[symbols.getDefaultProperties] () {
-		return {
-			getItemText: (item) => item.innerText,
-			selectNoneText: '--- None ---',
-		}
+	disable (disable) {
+		return this[symbols.scheduleUpdate](() => {
+			if (disable) {
+				this.element.setAttribute('disabled', true)
+				this.refs.selectList.setAttribute('disabled', true)
+			} else {
+				this.element.removeAttribute('disabled')
+				this.refs.selectList.removeAttribute('disabled')
+			}
+		})
 	}
 
 	getSelected () {
@@ -66,7 +65,7 @@ export default class EtchSelect extends EtchComponent
 
 		return (
 			<div className="etch-select">
-				<select onMouseDown={ disableClick } className="etch-select-header form-control">
+				<select ref="selectList" onMouseDown={ disableClick } className="etch-select-header form-control">
 					<option ref="header">{ header }</option>
 					{ options }
 				</select>
@@ -77,6 +76,19 @@ export default class EtchSelect extends EtchComponent
 				</div>
 			</div>
 		)
+	}
+	
+	[symbols.initialize] (props) {
+		this.keyValueMap = {}
+		this.currentSelection = null
+		this.changeHandler = props.onDidSelectionChange || (() => {})
+	}
+
+	[symbols.getDefaultProperties] () {
+		return {
+			getItemText: (item) => item.innerText,
+			selectNoneText: '--- None ---',
+		}
 	}
 
 	[renderOptions] () {

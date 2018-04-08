@@ -14,19 +14,16 @@ const renderOptions = Symbol()
 
 export default class EtchMultiSelect extends EtchComponent
 {
-	[symbols.initialize] (props) {
-		this.itemAttributes = {}
-		this.itemSelections = {}
-		this.changeHandler = props.onDidSelectionChange || (() => {})
-	}
-
-	[symbols.getDefaultProperties] () {
-		return {
-			// getItemValue: (child) => child.hasAttribute('value') ? child.getAttribute('value') : child.innerText,
-			selectNoneText: '--- None  ---',
-			selectAllText:  '---  All  ---',
-			selectSomeText: '--- Multi ---'
-		}
+	disable (disable) {
+		return this[symbols.scheduleUpdate](() => {
+			if (disable) {
+				this.element.setAttribute('disabled', true)
+				this.refs.selectList.setAttribute('disabled', true)
+			} else {
+				this.element.removeAttribute('disabled')
+				this.refs.selectList.removeAttribute('disabled')
+			}
+		})
 	}
 
 	getSelected () {
@@ -90,7 +87,7 @@ export default class EtchMultiSelect extends EtchComponent
 
 		return (
 			<div className="etch-multi-select">
-				<select onMouseDown={ disableClick } className="etch-multi-select-header form-control">
+				<select ref="selectList" onMouseDown={ disableClick } className="etch-multi-select-header form-control">
 					<option ref="header">{ header }</option>
 					{ options }
 				</select>
@@ -113,6 +110,20 @@ export default class EtchMultiSelect extends EtchComponent
 				</div>
 			</div>
 		)
+	}
+
+	[symbols.initialize] (props) {
+		this.itemAttributes = {}
+		this.itemSelections = {}
+		this.changeHandler = props.onDidSelectionChange || (() => {})
+	}
+
+	[symbols.getDefaultProperties] () {
+		return {
+			selectNoneText: '--- None  ---',
+			selectAllText:  '---  All  ---',
+			selectSomeText: '--- Multi ---'
+		}
 	}
 
 	[renderOptions] () {

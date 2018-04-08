@@ -39,9 +39,9 @@ export default class EtchFlexElement extends EtchComponent
 
 		return (
 			<div ref='outer'
-				 className={ this[symbols.getClassName]('etch-flex-element') }
-				 style={ this[symbols.getStyle]({flex: this[symbols.self].properties.flex}) }
-			 >
+				className={ this[symbols.getClassName]('etch-flex-element') }
+				style={ this[symbols.getStyle]({flex: this[symbols.self].properties.flex}) }
+			>
 				<div style={ innerStyle }>
 					{ this[symbols.self].children }
 				</div>
