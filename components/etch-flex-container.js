@@ -42,6 +42,7 @@ export default class EtchFlexContainer extends EtchComponent
 	update () {
 		super.update(...arguments, {update: false})
 
+		this[symbols.self].flexData = this[computeFlexData]()
 		this[configureChildrensProps]()
 
 		return etch.update(this)
@@ -316,15 +317,16 @@ export default class EtchFlexContainer extends EtchComponent
 			}, 0)
 		}
 
-		const flexDataInit = this[symbols.self].children.map(child => {
+		const flexDataInit = this[symbols.self].children.map((child, idx) => {
 			const props = child.props || {}
+			const flex = (this[symbols.state][idx] && this[symbols.state][idx].flex) || props.flex
 
 			return {
 				maxFlex: (props.maxSize || Number.MAX_VALUE) * pixelFlex,
 				sizeFlex: (props.size || Number.MAX_VALUE) * pixelFlex,
 				minFlex: (props.minSize || 1) * pixelFlex,
-				constrained: props.flex !== undefined,
-				flex: props.flex || 0,
+				constrained: flex !== undefined,
+				flex: flex || 0,
 				isSplitter: child.tag === EtchFlexSplitter
 			}
 		})
