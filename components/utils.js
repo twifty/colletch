@@ -5,6 +5,26 @@ export function getType(data) {
 	return Object.prototype.toString.call(data).toLowerCase().slice(8, -1)
 }
 
+export function innerText(virtualNode) {
+	if (!virtualNode) {
+		throw new Error('Cannot traverse null or undefined!')
+	}
+
+	if (virtualNode.text) {
+		return virtualNode.text
+	}
+
+	let text = ''
+
+	if (Array.isArray(virtualNode.children)) {
+		for (const child of virtualNode.children) {
+			text += innerText(child)
+		}
+	}
+
+	return text
+}
+
 export function clone(data) {
 	const type = getType(data)
 	switch (type) {

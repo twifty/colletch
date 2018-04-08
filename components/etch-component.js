@@ -45,7 +45,7 @@ export default class EtchComponent
 		}
 
 		if (typeof this[symbols.initialize] === 'function') {
-			this[symbols.initialize]()
+			this[symbols.initialize](this[symbols.self].properties, this[symbols.self].children)
 		}
 
 		etch.initialize(this)

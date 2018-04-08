@@ -186,8 +186,8 @@ export default class EtchTreeNode extends EtchComponent
 		} else {
 			const className = this[symbols.getClassName](
 				'list-item',
-				 this[symbols.self].properties.selected ? 'selected' : null
-			 )
+				this[symbols.self].properties.selected ? 'selected' : null
+			)
 
 			return (
 				<li className={ className } onClick={ this.onClick }>

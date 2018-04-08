@@ -211,3 +211,26 @@
   	margin-top: 1px;
   }
 }
+
+.etch-multi-select, .etch-select {
+	position: relative;
+	display: inline-block;
+
+	> .select-list {
+		display: none;
+		position: absolute;
+		max-height: 200px;
+		overflow-y: auto;
+		z-index: 200;
+
+		.list-group {
+			margin: 0;
+			overflow-y: initial !important;
+    		max-height: initial !important;
+		}
+	}
+
+	&:hover > .select-list {
+		display: block;
+	}
+}

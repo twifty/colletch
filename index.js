@@ -10,6 +10,8 @@ import EtchTerminal from './components/etch-terminal'
 import EtchTable from './components/etch-table'
 import EtchTableColumn from './components/etch-table-column'
 import EtchTableCell from './components/etch-table-cell'
+import EtchMultiSelect from './components/etch-multi-select'
+import EtchSelect from './components/etch-select'
 
 export {
   EtchFlexContainer,
@@ -21,5 +23,7 @@ export {
   EtchTerminal,
   EtchTable,
   EtchTableColumn,
-  EtchTableCell
+  EtchTableCell,
+  EtchMultiSelect,
+  EtchSelect,
 };
