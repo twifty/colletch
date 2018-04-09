@@ -24,10 +24,17 @@ export default class EtchTreeNode extends EtchComponent
 {
 	constructor (props, children, options) {
 		let doubleClickHandler = null
+		let singleClickHandler = null
 
-		if (props.on && props.on.dblclick) {
-			doubleClickHandler = props.on.dblclick
-			delete props.on.dblclick
+		if (props.on) {
+			if (props.on.dblclick) {
+				doubleClickHandler = props.on.dblclick
+				delete props.on.dblclick
+			}
+			if (props.on.click) {
+				singleClickHandler = props.on.click
+				delete props.on.click
+			}
 		}
 
 		super(props, children, options)
@@ -40,6 +47,10 @@ export default class EtchTreeNode extends EtchComponent
 
 		if (typeof doubleClickHandler === 'function') {
 			this.on('dblclick', doubleClickHandler)
+		}
+
+		if (typeof singleClickHandler === 'function') {
+			this.on('click', singleClickHandler)
 		}
 	}
 
@@ -131,6 +142,7 @@ export default class EtchTreeNode extends EtchComponent
 					if (this.clicked) {
 						this.clicked = false
 						this.setCollapsed(!this[symbols.self].properties.collapsed)
+						this[symbols.emit]('click', event)
 					}
 				}, 300)
 			}
@@ -140,6 +152,7 @@ export default class EtchTreeNode extends EtchComponent
 	render () {
 		var itemData = null
 		var children = null
+		const key = this[symbols.self].properties.key
 
 		const itemIcon = this[symbols.self].properties.icon
 			? (<span className={'icon ' + this[symbols.self].properties.icon}></span>)
@@ -174,7 +187,7 @@ export default class EtchTreeNode extends EtchComponent
 			)
 
 			return (
-				<li className={ className }>
+				<li key={ key } className={ className }>
 					<div className="list-item" onClick={this.onClick}>
 						{ itemData }
 					</div>
@@ -190,7 +203,7 @@ export default class EtchTreeNode extends EtchComponent
 			)
 
 			return (
-				<li className={ className } onClick={ this.onClick }>
+				<li key={ key } className={ className } onClick={ this.onClick }>
 					{ itemData }
 				</li>
 			)

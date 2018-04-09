@@ -1,6 +1,6 @@
 {
   "name": "colletch",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A collection of etch components",
   "main": "index.js",
   "scripts": {
