@@ -54,10 +54,16 @@
    */
   > .etch-flex-element {
     position: relative;
-    overflow: auto;
-    height: 100%;
-    width: 100%;
+	overflow: hidden;
     flex: 1;
+  }
+
+  &.vertical > .etch-flex-element {
+	  width: 100%;
+  }
+
+  &.horizontal > .etch-flex-element {
+	  height: 100%
   }
 
   /**
