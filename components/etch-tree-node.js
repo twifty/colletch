@@ -103,17 +103,15 @@ export default class EtchTreeNode extends EtchComponent
 	}
 
 	setDisabled (disabled) {
-		if (disabled !== this[symbols.self].properties.disabled) {
-			this[symbols.self].properties.disabled = disabled
+		this[symbols.self].properties.disabled = disabled
 
-			this[symbols.scheduleUpdate](() => {
-				if (this[symbols.self].properties.disabled) {
-					this.element.setAttribute('disabled', true)
-				} else {
-					this.element.removeAttribute('disabled')
-				}
-			})
-		}
+		this[symbols.scheduleUpdate](() => {
+			if (this[symbols.self].properties.disabled) {
+				this.element.setAttribute('disabled', true)
+			} else {
+				this.element.removeAttribute('disabled')
+			}
+		})
 	}
 
 	isSelected () {
@@ -153,6 +151,7 @@ export default class EtchTreeNode extends EtchComponent
 		var itemData = null
 		var children = null
 		const key = this[symbols.self].properties.key
+		const disabled = this[symbols.self].properties.attributes.disabled ? {disabled: true} : {}
 
 		const itemIcon = this[symbols.self].properties.icon
 			? (<span className={'icon ' + this[symbols.self].properties.icon}></span>)
@@ -187,7 +186,7 @@ export default class EtchTreeNode extends EtchComponent
 			)
 
 			return (
-				<li key={ key } className={ className }>
+				<li key={ key } className={ className } { ...disabled }>
 					<div className="list-item" onClick={this.onClick}>
 						{ itemData }
 					</div>
@@ -203,7 +202,7 @@ export default class EtchTreeNode extends EtchComponent
 			)
 
 			return (
-				<li key={ key } className={ className } onClick={ this.onClick }>
+				<li key={ key } className={ className } onClick={ this.onClick } { ...disabled }>
 					{ itemData }
 				</li>
 			)
