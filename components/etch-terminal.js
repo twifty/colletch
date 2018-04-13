@@ -164,6 +164,9 @@ export default class EtchTerminal extends EtchComponent
 
 	write (data) {
 		return this[symbols.scheduleUpdate](() => {
+			const listElement = this.refs.list
+			let autoScroll = listElement.scrollHeight - listElement.scrollTop === listElement.clientHeight
+
 			this[forEachToken](data, token => {
 				this[setState](token)
 
@@ -183,6 +186,11 @@ export default class EtchTerminal extends EtchComponent
 				}
 			})
 			etch.updateSync(this)
+
+			if (autoScroll) {
+				this[symbols.self].currLine.scrollIntoView()
+			}
+
 			this.focus()
 		})
 	}
@@ -237,7 +245,7 @@ export default class EtchTerminal extends EtchComponent
 
 	render () {
 		return (
-			<ul className={ this[symbols.getClassName]('etch-term', 'native-key-bindings') } tabIndex="-1">
+			<ul ref="list" className={ this[symbols.getClassName]('etch-term', 'native-key-bindings') } tabIndex="-1">
 				{ this[symbols.self].lines }
 			</ul>
 		)
