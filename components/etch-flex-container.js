@@ -25,6 +25,9 @@ const computePixelFlex = Symbol()
 const computeFlexData = Symbol()
 const configureChildrensProps = Symbol()
 
+/**
+ * Original code from https://github.com/leefsmp/Re-Flex with permission.
+ */
 export default class EtchFlexContainer extends EtchComponent
 {
 	constructor () {
@@ -293,11 +296,13 @@ export default class EtchFlexContainer extends EtchComponent
 	}
 
 	[computePixelFlex] () {
+		let delta = this.element.offsetHeight
+
 		if (this[symbols.self].properties.orientation === 'vertical') {
-			return 1.0 / this.element.offsetWidth
+			delta = this.element.offsetWidth
 		}
 
-		return 1.0 / this.element.offsetHeight
+		return delta ? (1.0 / delta) : 0.0
 	}
 
 	[computeFlexData] () {
