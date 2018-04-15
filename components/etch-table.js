@@ -158,9 +158,9 @@ export default class EtchTable extends EtchComponent
 			}
 
 			cells.push(
-				<div ref={ref} className={classNames.join(' ')} on={events}>
+				<th ref={ref} className={classNames.join(' ')} on={events}>
 					{child}
-				</div>
+				</th>
 			)
 		}
 
@@ -182,9 +182,9 @@ export default class EtchTable extends EtchComponent
 			}
 
 			rows.push(
-				<div ref={ref} className="etch-table-row">
+				<tr ref={ref} className="etch-table-row">
 					{cells}
-				</div>
+				</tr>
 			)
 		}
 
@@ -196,10 +196,16 @@ export default class EtchTable extends EtchComponent
 		const rows = this.buildRows()
 
 		return (
-			<div className={this[symbols.getClassName]('etch-table')}>
-				<div ref='header' className='etch-table-header'>{header}</div>
-				<div ref='body' className='etch-table-body'>{rows}</div>
-			</div>
+			<table className={this[symbols.getClassName]('etch-table')}>
+				<thead ref='header' className='etch-table-header'>
+					<tr className="etch-table-row">
+						{ header }
+					</tr>
+				</thead>
+				<tbody ref='body' className='etch-table-body'>
+					{ rows }
+				</tbody>
+			</table>
 		)
 	}
 }

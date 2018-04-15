@@ -105,6 +105,7 @@ export default class EtchMultiSelect extends EtchComponent
 						>
 							{ this[symbols.self].properties.selectNoneText }
 						</li>
+						<li className="divider"></li>
 						{ children }
 					</ol>
 				</div>
@@ -120,9 +121,9 @@ export default class EtchMultiSelect extends EtchComponent
 
 	[symbols.getDefaultProperties] () {
 		return {
-			selectNoneText: '--- None  ---',
-			selectAllText:  '---  All  ---',
-			selectSomeText: '--- Multi ---'
+			selectNoneText: 'None',
+			selectAllText:  'All',
+			selectSomeText: 'Multiple'
 		}
 	}
 
@@ -198,16 +199,6 @@ export default class EtchMultiSelect extends EtchComponent
 				</li>
 			)
 		}
-
-		// for (const key of Object.keys(this.itemAttributes)) {
-		// 	if (!(key in attributes)) {
-		// 		delete this.itemAttributes[key]
-		// 		delete this.itemSelections[key]
-		// 	}
-		// }
-		//
-		// Object.assign(this.itemAttributes, attributes)
-		// Object.assign(this.itemSelections, selections)
 
 		return items
 	}

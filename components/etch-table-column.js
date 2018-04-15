@@ -103,9 +103,9 @@ export default class EtchTableColumn extends EtchComponent
 		const events = this.bindEvents()
 
 		return (
-			<div className={this[symbols.getClassName]('etch-table-cell')} on={events}>
+			<td className={this[symbols.getClassName]('etch-table-cell')} on={events}>
 				{ cell }
-			</div>
+			</td>
 		)
 	}
 }

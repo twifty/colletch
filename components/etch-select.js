@@ -77,7 +77,7 @@ export default class EtchSelect extends EtchComponent
 			</div>
 		)
 	}
-	
+
 	[symbols.initialize] (props) {
 		this.keyValueMap = {}
 		this.currentSelection = null
@@ -87,7 +87,7 @@ export default class EtchSelect extends EtchComponent
 	[symbols.getDefaultProperties] () {
 		return {
 			getItemText: (item) => item.innerText,
-			selectNoneText: '--- None ---',
+			selectNoneText: 'None',
 		}
 	}
 
