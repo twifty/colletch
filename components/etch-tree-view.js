@@ -27,6 +27,14 @@ export default class EtchTreeView extends EtchComponent
 		super(props, children, options)
 
 		this[symbols.self].childNodes = buildHierarchy(children, this)
+
+		this[symbols.addHoverListener](this.element, 'Control', ({hovering}) => {
+			if (hovering) {
+				this.element.classList.add('is-selecting')
+			} else {
+				this.element.classList.remove('is-selecting')
+			}
+		})
 	}
 
 	update (props, children) {
@@ -46,22 +54,34 @@ export default class EtchTreeView extends EtchComponent
 	render () {
 		const className = this[symbols.getClassName]('etch-tree list-tree has-collapsable-children')
 
-		const onKeyDown = (event) => {
-			if (event.ctrlKey) {
-				this.refs.tree.classList.add('is-selecting')
-			} else {
-				this.refs.tree.classList.remove('is-selecting')
-			}
-		}
-
 		return (
 			<ul className={className}
 				style={this[symbols.getStyle]()}
 				ref="tree"
-				onMouseMove={onKeyDown}
+				// onMouseMove={handleMouse}
 			>
 				{ this[symbols.self].children }
 			</ul>
 		)
+	}
+
+	setActiveNode (node = null) {
+		this.clearActiveNode()
+
+		if (node) {
+			this[symbols.self].activeNode = node
+			node.element.classList.add('active')
+		}
+	}
+
+	clearActiveNode (node = null) {
+		if (!node) {
+			node = this[symbols.self].activeNode
+		}
+
+		if (node && node === this[symbols.self].activeNode) {
+			node.element.classList.remove('active')
+			this[symbols.self].activeNode = null
+		}
 	}
 }

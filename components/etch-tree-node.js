@@ -1,5 +1,6 @@
 /** @babel */
 /** @jsx etch.dom */
+/* global window */
 
 import etch from 'etch'
 
@@ -52,6 +53,21 @@ export default class EtchTreeNode extends EtchComponent
 		if (typeof singleClickHandler === 'function') {
 			this.on('click', singleClickHandler)
 		}
+
+		this[symbols.addHoverListener](this.element, 'Alt', ({hovering}) => {
+			if (hovering) {
+				this.element.classList.add('alt')
+			} else {
+				this.element.classList.remove('alt')
+			}
+		})
+	}
+
+	destroy () {
+		window.removeEventListener('keydown', this.monitorKeyboard)
+		window.removeEventListener('keyup', this.monitorKeyboard)
+
+		super.destroy()
 	}
 
 	update (props, children) {
@@ -72,7 +88,31 @@ export default class EtchTreeNode extends EtchComponent
 		return this[symbols.self].parentNode
 	}
 
-	setSelected (select) {
+	setActive (active, event = null) {
+		return this[symbols.scheduleUpdate](() => {
+			let rootNode = this.getParentNode()
+
+			while (rootNode.constructor.name !== 'EtchTreeView') {
+				rootNode = rootNode.getParentNode()
+			}
+
+			if (active) {
+				rootNode.setActiveNode(this)
+			} else {
+				rootNode.clearActiveNode(this)
+			}
+
+			if (event) {
+				return this[symbols.emit]('active', {
+					active,
+					node: this,
+					event
+				})
+			}
+		})
+	}
+
+	setSelected (select, event = null) {
 		return this[symbols.scheduleUpdate](() => {
 			if (select) {
 				this.element.classList.add('selected')
@@ -80,11 +120,17 @@ export default class EtchTreeNode extends EtchComponent
 				this.element.classList.remove('selected')
 			}
 
-			return this[symbols.emit]('select', this)
+			if (event) {
+				return this[symbols.emit]('select', {
+					selected: select,
+					node: this,
+					event
+				})
+			}
 		})
 	}
 
-	setCollapsed (collapse) {
+	setCollapsed (collapse, event = null) {
 		return this[symbols.scheduleUpdate](() => {
 			if (collapse) {
 				this.element.classList.add('collapsed')
@@ -94,11 +140,17 @@ export default class EtchTreeNode extends EtchComponent
 				this.element.classList.remove('collapsed')
 			}
 
-			return this[symbols.emit]('click', this)
+			if (event) {
+				return this[symbols.emit]('click', {
+					collapsed: collapse,
+					node: this,
+					event
+				})
+			}
 		})
 	}
 
-	setDisabled (disable) {
+	setDisabled (disable, event = null) {
 		return this[symbols.scheduleUpdate](() => {
 			if (disable) {
 				this.element.setAttribute('disabled', true)
@@ -106,7 +158,13 @@ export default class EtchTreeNode extends EtchComponent
 				this.element.removeAttribute('disabled')
 			}
 
-			return this[symbols.emit]('disable', this)
+			if (event) {
+				return this[symbols.emit]('disable', {
+					disabled: disable,
+					node: this,
+					event
+				})
+			}
 		})
 	}
 
@@ -122,9 +180,17 @@ export default class EtchTreeNode extends EtchComponent
 		return this.element.hasAttribute('disabled')
 	}
 
+	isActive () {
+		return this.element.classList.contains('active')
+	}
+
 	onClick (event) {
-		if (event.ctrlKey) {
-			this.setSelected(!this.isSelected())
+		this.setActive(true, event)
+
+		if (event.altKey) {
+			this.setCollapsed(!this.isCollapsed(), event)
+		} else if (event.ctrlKey) {
+			this.setSelected(!this.isSelected(), event)
 		} else {
 			if (this.clicked) {
 				this.clicked = false
@@ -134,7 +200,7 @@ export default class EtchTreeNode extends EtchComponent
 				window.setTimeout(() => { // eslint-disable-line no-undef
 					if (this.clicked) {
 						this.clicked = false
-						this.setCollapsed(!this.isCollapsed())
+						this[symbols.emit]('click', event)
 					}
 				}, 300)
 			}
@@ -172,6 +238,11 @@ export default class EtchTreeNode extends EtchComponent
 			return (<div/>)
 		}
 
+		const attributes = {
+			key,
+			disabled
+		}
+
 		if (children.length) {
 			const className = this[symbols.getClassName](
 				'list-nested-item',
@@ -180,7 +251,7 @@ export default class EtchTreeNode extends EtchComponent
 			)
 
 			return (
-				<li key={ key } className={ className } { ...disabled }>
+				<li { ...attributes } className={ className }>
 					<div className="list-item" onClick={this.onClick}>
 						{ itemData }
 					</div>
@@ -196,7 +267,7 @@ export default class EtchTreeNode extends EtchComponent
 			)
 
 			return (
-				<li key={ key } className={ className } onClick={ this.onClick } { ...disabled }>
+				<li { ...attributes } className={ className } onClick={ this.onClick } >
 					{ itemData }
 				</li>
 			)

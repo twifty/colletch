@@ -280,3 +280,40 @@
 		display: block;
 	}
 }
+
+.etch-tree {
+	&.is-selecting {
+		.list-item {
+			cursor: pointer;
+		}
+	}
+
+	.list-nested-item.alt {
+		cursor: s-resize;
+
+		&.expanded {
+			cursor: n-resize;
+		}
+	}
+
+	&.list-tree li[disabled] {
+		display: none;
+	}
+
+	.active > * {
+		position: relative;
+	}
+
+	.list-item.active::before, .list-nested-item.active::before {
+		background-color: @background-color-highlight;
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 2em;
+	}
+
+	.list-item.selected::before, .list-nested-item.selected::before {
+		background-color: @background-color-selected;
+	}
+}

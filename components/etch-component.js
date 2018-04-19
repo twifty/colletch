@@ -1,5 +1,5 @@
 /** @babel */
-/* global atom */
+/* global atom window */
 
 import etch from 'etch'
 import {Emitter, CompositeDisposable} from 'atom'
@@ -37,6 +37,8 @@ export default class EtchComponent
 
 		if (properties.state) {
 			this[symbols.state] = clone(properties.state)
+		} else {
+			this[symbols.state] = {}
 		}
 
 		this[symbols.self] = {
@@ -127,12 +129,12 @@ export default class EtchComponent
 		return {}
 	}
 
-	[symbols.listen] (cb) {
+	[symbols.listen] (disposable) {
 		if (!this.listeners) {
 			this.listeners = new CompositeDisposable()
 		}
 
-		this.listeners.add(cb)
+		this.listeners.add(disposable)
 	}
 
 	[symbols.emit] (eventName, data) {
@@ -149,6 +151,54 @@ export default class EtchComponent
 		for (var name in listeners) {
 			element.addEventListener(name, listeners[name])
 		}
+	}
+
+	[symbols.addHoverListener] (element = null, key = null, listener = null) {
+		element = element || this.element
+		listener = listener || this[symbols.emit].bind(this, 'hover')
+
+		let isKeyPressed = key ? false : true
+		let isHovering = false
+
+		const handleHover = (keyPressed, hovering, event) => {
+			const toggle = keyPressed !== isKeyPressed || hovering !== isHovering
+
+			if (toggle) {
+				isKeyPressed = keyPressed
+				isHovering = hovering
+
+				listener({
+					component: this,
+					hovering: keyPressed && hovering,
+					event
+				})
+			}
+		}
+
+		const monitorKeyboard = (event) => {
+			const keyPressed = 'keydown' === event.type && event.key === key
+			handleHover(keyPressed, isHovering, event)
+		}
+
+		const monitorMouse = (event) => {
+			const hovering = 'mouseover' === event.type
+			handleHover(isKeyPressed, hovering, event)
+		}
+
+		if (null !== key) {
+			window.addEventListener('keydown', monitorKeyboard, true)
+			window.addEventListener('keyup', monitorKeyboard, true);
+
+			this[symbols.listen]({
+				dispose: () => {
+					window.removeEventListener('keydown', monitorKeyboard,)
+					window.removeEventListener('keyup', monitorKeyboard)
+				}
+			})
+		}
+
+		element.addEventListener('mouseover', monitorMouse, true)
+		element.addEventListener('mouseleave', monitorMouse, true)
 	}
 
 	[symbols.addDataSet] (element, dataset) {

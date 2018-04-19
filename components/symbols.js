@@ -14,6 +14,8 @@ export default {
 
 	addEventListeners: Symbol(),
 
+	addHoverListener: Symbol(),
+
 	addDataSet: Symbol(),
 
 	scheduleUpdate: Symbol(),
