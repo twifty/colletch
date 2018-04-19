@@ -52,13 +52,17 @@ export default class EtchTreeView extends EtchComponent
 	}
 
 	render () {
-		const className = this[symbols.getClassName]('etch-tree list-tree has-collapsable-children')
+		const classNames = [
+			'etch-tree list-tree'
+		]
+
+		if (this[symbols.self].children.length) {
+			classNames.push('has-collapsable-children')
+		}
 
 		return (
-			<ul className={className}
-				style={this[symbols.getStyle]()}
-				ref="tree"
-				// onMouseMove={handleMouse}
+			<ul className={ this[symbols.getClassName](classNames) }
+				style={ this[symbols.getStyle]() }
 			>
 				{ this[symbols.self].children }
 			</ul>
