@@ -72,64 +72,59 @@ export default class EtchTreeNode extends EtchComponent
 		return this[symbols.self].parentNode
 	}
 
-	setSelected (selected) {
-		if (selected !== this[symbols.self].properties.selected) {
-			this[symbols.self].properties.selected = selected
+	setSelected (select) {
+		return this[symbols.scheduleUpdate](() => {
+			if (select) {
+				this.element.classList.add('selected')
+			} else {
+				this.element.classList.remove('selected')
+			}
 
-			this[symbols.scheduleUpdate](() => {
-				if (selected) {
-					this.element.classList.add('selected')
-				} else {
-					this.element.classList.remove('selected')
-				}
-			})
-		}
+			return this[symbols.emit]('select', this)
+		})
 	}
 
-	setCollapsed (collapsed) {
-		if (collapsed !== this[symbols.self].properties.collapsed) {
-			this[symbols.self].properties.collapsed = collapsed
+	setCollapsed (collapse) {
+		return this[symbols.scheduleUpdate](() => {
+			if (collapse) {
+				this.element.classList.add('collapsed')
+				this.element.classList.remove('expanded')
+			} else {
+				this.element.classList.add('expanded')
+				this.element.classList.remove('collapsed')
+			}
 
-			this[symbols.scheduleUpdate](() => {
-				if (this[symbols.self].properties.collapsed) {
-					this.element.classList.add('collapsed')
-					this.element.classList.remove('expanded')
-				} else {
-					this.element.classList.add('expanded')
-					this.element.classList.remove('collapsed')
-				}
-			})
-		}
+			return this[symbols.emit]('click', this)
+		})
 	}
 
-	setDisabled (disabled) {
-		this[symbols.self].properties.disabled = disabled
-
-		this[symbols.scheduleUpdate](() => {
-			if (this[symbols.self].properties.disabled) {
+	setDisabled (disable) {
+		return this[symbols.scheduleUpdate](() => {
+			if (disable) {
 				this.element.setAttribute('disabled', true)
 			} else {
 				this.element.removeAttribute('disabled')
 			}
+
+			return this[symbols.emit]('disable', this)
 		})
 	}
 
 	isSelected () {
-		return !!this[symbols.self].properties.selected
+		return this.element.classList.contains('selected')
 	}
 
 	isCollapsed () {
-		return !!this[symbols.self].properties.collapsed
+		return this.element.classList.contains('collapsed')
 	}
 
 	isDisabled () {
-		return !!this[symbols.self].properties.disabled
+		return this.element.hasAttribute('disabled')
 	}
 
 	onClick (event) {
 		if (event.ctrlKey) {
-			this.setSelected(!this[symbols.self].properties.selected)
-			this[symbols.emit]('select', this)
+			this.setSelected(!this.isSelected())
 		} else {
 			if (this.clicked) {
 				this.clicked = false
@@ -139,8 +134,7 @@ export default class EtchTreeNode extends EtchComponent
 				window.setTimeout(() => { // eslint-disable-line no-undef
 					if (this.clicked) {
 						this.clicked = false
-						this.setCollapsed(!this[symbols.self].properties.collapsed)
-						this[symbols.emit]('click', event)
+						this.setCollapsed(!this.isCollapsed())
 					}
 				}, 300)
 			}
