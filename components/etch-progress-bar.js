@@ -20,6 +20,14 @@ export default class EtchProgressBar extends EtchComponent
 		}
 	}
 
+	update (properties) {
+		this[symbols.self].properties.total = properties.total
+		this[symbols.self].properties.complete = properties.complete
+		this[symbols.self].properties.label = properties.label
+
+		return etch.update(this)
+	}
+
 	render () {
 		const total = toNumber(this[symbols.self].properties.total, 0)
 		const width = Math.max(0, Math.min(total, toNumber(this[symbols.self].properties.complete, 0)))
