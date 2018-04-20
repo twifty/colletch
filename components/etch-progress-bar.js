@@ -17,7 +17,6 @@ export default class EtchProgressBar extends EtchComponent
 		return {
 			total: 0,
 			complete: 0,
-			// label: ''
 		}
 	}
 
@@ -28,7 +27,7 @@ export default class EtchProgressBar extends EtchComponent
 		const label = typeof this[symbols.self].properties.label === 'string' ? this[symbols.self].properties.label : (percent + '%')
 
 		return (
-			<div dataset={ {width, total, percent} } className={ this[symbols.getClassName]("etch-progress-bar")} >
+			<div dataset={ {width, total, percent} } className={ this[symbols.getClassName]("etch-progress-bar", total ? null : 'empty')} >
 				<div className="complete" style={ {width: percent + '%'} }></div>
 				<span className="label">{ label }</span>
 			</div>

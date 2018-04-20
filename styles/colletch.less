@@ -2,27 +2,27 @@
 
 .etch-progress-bar {
 	position: relative;
-	background-color: fade(@text-color-error, 50%);
+	background-image: -webkit-linear-gradient(#f0a3a3, #f42323);
 	overflow: hidden;
-	height: 90%;
+	height: 100%;
+	border-radius: 4px;
 
-	&[data-total='0'] {
-		background-color: fade(@text-color-warning, 50%);
+	&.empty {
+		background-image: -webkit-linear-gradient(#f1a165, #f36d0a);
 	}
 
 	> .complete {
 		position: absolute;
-		background-color: fade(@text-color-success, 50%);
+		background-image: -webkit-linear-gradient(#98ea98, #307b11);
 		height: 100%;
-		// float: left;
 	}
 
 	> .label {
 		position: absolute;
 		width: 100%;
 		height: 100%;
-		font-weight: bold;
-		text-shadow: 0 -1px 0 @text-color-info;
+		color: #000;
+		font-weight: normal;
 		justify-content: center;
 		align-items: center;
 		display: flex;
