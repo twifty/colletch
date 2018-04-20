@@ -185,6 +185,12 @@ export default class EtchTreeNode extends EtchComponent
 	}
 
 	onClick (event) {
+		if (event.target.classList.contains('list-item')) {
+			if (event.offsetX < event.target.firstChild.offsetLeft) {
+				return this.setCollapsed(!this.isCollapsed(), event)
+			}
+		}
+
 		this.setActive(true, event)
 
 		if (event.altKey) {

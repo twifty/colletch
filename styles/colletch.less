@@ -304,6 +304,10 @@
 		position: relative;
 	}
 
+	.list-item::before {
+		cursor: pointer;
+	}
+
 	.list-item.active::before, .list-nested-item.active::before {
 		background-color: @background-color-highlight;
 		content: '';
