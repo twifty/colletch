@@ -18,7 +18,6 @@ const setState = Symbol()
 const forEachToken = Symbol()
 const resetData = Symbol()
 const moveCursor = Symbol()
-const backspace = Symbol()
 
 const classes = [
     "ansi-black",
@@ -118,7 +117,7 @@ class Token
             this.currArg = null
         }
 
-        this.args = this.args.map(parseInt)
+        this.args = this.args.map(Number)
         this.finalized = true
 
         return this
@@ -262,7 +261,7 @@ class Cursor
                             break
                         case 'Enter':
                             if (this.emitter) {
-                                this.emitter.emit('input', display.textContent)
+                                this.emitter.emit('input', display.textContent + '\n')
                             }
                             display.textContent = ''
                             index = 0
@@ -384,7 +383,7 @@ class Cursor
         return this.emitter.on(name, callback)
     }
 
-    [buildAttributes] ({background = null, foreground = null} = {}) {
+    [buildAttributes] ({background = DEFAULT_BACKGROUND, foreground = DEFAULT_FOREGROUND} = {}) {
         const classes = []
         const styles = {}
 
