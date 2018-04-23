@@ -99,6 +99,34 @@ const DEFAULT_STATE = {
     blinkFast: false
 }
 
+function innerTextNode (node) {
+    while (node && 3 !== node.nodeType) {
+        node = node.firstChild
+    }
+
+    if (node && 3 === node.nodeType) {
+        return node
+    }
+
+    return null
+}
+
+function splitNode (node, delta) {
+    const clone = node.cloneNode(true)
+    const leading = innerTextNode(clone)
+    const trailing = innerTextNode(node)
+
+    leading.textContent = leading.textContent.substr(0, delta)
+    trailing.textContent = trailing.textContent.substr(delta)
+
+    clone.dataset.length = delta
+    node.dataset.length -= delta
+
+    node.parentNode.insertBefore(clone, node)
+
+    return clone
+}
+
 class Token
 {
     constructor () {
@@ -294,43 +322,37 @@ class Cursor
     }
 
     getState () {
-        return this.state
+        return Object.assign({}, this.state)
+    }
+
+    setState (state) {
+        Object.assign(this.state, state)
+
+        if (this.element) {
+            const {classes, styles} = this[buildAttributes]()
+
+            this.element.className = [
+                'etch-term-cursor',
+                ...classes
+            ].join(' ')
+
+            for (const name in styles) {
+                this.element.style[name] = styles[name]
+            }
+        }
     }
 
     resetState () {
-        Object.assign(this.state, DEFAULT_STATE)
+        this.setState(DEFAULT_STATE)
     }
 
     write (text) {
         const {classes, styles} = this[buildAttributes]()
-
-        function wrapElement(tag, child) {
-            const wrapper = document.createElement(tag)
-            wrapper.appendChild(child)
-
-            return wrapper
-        }
-
-        let dom = document.createTextNode(text)
-
-        // TODO use styles rather than elements
-        if (this.state.bold) {
-            dom = wrapElement('b', dom)
-        }
-        if (this.state.italic) {
-            dom = wrapElement('i', dom)
-        }
-        if (this.state.underline) {
-            dom = wrapElement('u', dom)
-        }
-        if (this.state.strikethrough) {
-            dom = wrapElement('del', dom)
-        }
-
-        const span = wrapElement('span', dom)
+        const span = document.createElement('span')
 
         span.classList.add(...classes)
         span.dataset.length = text.length
+        span.textContent = text
 
         for (const name in styles) {
             span.style[name] = styles[name]
@@ -416,36 +438,21 @@ class Cursor
             }
         }
 
+        if (this.state.bold) { // font-weight: bold
+            styles.fontWeight = 'bold'
+        }
+        if (this.state.italic) { // font-style: italic
+            styles.fontStyle = 'italic'
+        }
+        if (this.state.underline) { // text-decoration: underline
+            styles.textDecoration = 'underline'
+        }
+        if (this.state.strikethrough) { // text-decoration: line-through
+            styles.textDecoration = (styles.textDecoration ? styles.textDecoration + ' ' : '') + 'line-through'
+        }
+
         return {classes, styles, background: bg, foreground: fg}
     }
-}
-
-function innerTextNode (node) {
-    while (node && 3 !== node.nodeType) {
-        node = node.firstChild
-    }
-
-    if (node && 3 === node.nodeType) {
-        return node
-    }
-
-    return null
-}
-
-function splitNode (node, delta) {
-    const clone = node.cloneNode(true)
-    const leading = innerTextNode(clone)
-    const trailing = innerTextNode(node)
-
-    leading.textContent = leading.textContent.substr(0, delta)
-    trailing.textContent = trailing.textContent.substr(delta)
-
-    clone.dataset.length = delta
-    node.dataset.length -= delta
-
-    node.parentNode.insertBefore(clone, node)
-
-    return clone
 }
 
 export default class EtchTerminal extends EtchComponent
@@ -742,7 +749,7 @@ export default class EtchTerminal extends EtchComponent
 
     [setState] (token) {
         if ('m' === token.command) {
-            const state = this[symbols.self].cursor.getState()
+            let state = this[symbols.self].cursor.getState()
 
             // TODO styles should be storePositiond in the cursor
             // See https://stackoverflow.com/a/33206814/1479092 for token args
@@ -751,7 +758,8 @@ export default class EtchTerminal extends EtchComponent
 
                 switch (arg) {
                     case 0: // Reset
-                        this[symbols.self].cursor.resetState()
+                        Object.assign(state, DEFAULT_STATE)
+                        // state = this[symbols.self].cursor.resetState()
                         break
                     case 1:
                         state.bold = true
@@ -861,6 +869,8 @@ export default class EtchTerminal extends EtchComponent
                         break
                 }
             }
+
+            this[symbols.self].cursor.setState(state)
         } else if ('A' <= token.command && token.command <= 'G') {
             const cursor = this[symbols.self].cursor.clone()
             const offset = token.getArg(0, 1)
