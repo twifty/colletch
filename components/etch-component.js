@@ -74,8 +74,9 @@ export default class EtchComponent
 	}
 
 	destroy () {
-		if (this.listeners) {
-			this.listeners.dispose()
+		if (this.disposables) {
+			this.disposables.dispose()
+            this.disposables = null
 		}
 
 		etch.destroy(this)
@@ -129,13 +130,19 @@ export default class EtchComponent
 		return {}
 	}
 
-	[symbols.listen] (disposable) {
-		if (!this.listeners) {
-			this.listeners = new CompositeDisposable()
+    [symbols.addDisposable] (disposable) {
+		if (!this.disposables) {
+			this.disposables = new CompositeDisposable()
 		}
 
-		this.listeners.add(disposable)
-	}
+        if (typeof disposable === 'function' && !(typeof disposable.dispose === 'function')) {
+            this.disposables.add({
+                dispose: disposable
+            })
+        } else {
+            this.disposables.add(disposable)
+        }
+    }
 
 	[symbols.emit] (eventName, data) {
 		if (!this.emitter) {
@@ -144,12 +151,23 @@ export default class EtchComponent
 		this.emitter.emit(eventName, data)
 	}
 
+	[symbols.addEventListener] (element, name, listener) {
+		element = element || this.element
+		listener = listener || this[symbols.self].properties.on[listener]
+
+        if (typeof listener === 'function') {
+			element.addEventListener(name, listener)
+            this[symbols.addDisposable](() => element.removeEventListener(name, listener))
+		}
+	}
+
 	[symbols.addEventListeners] (element, listeners) {
 		element = element || this.element
 		listeners = listeners || this[symbols.self].properties.on
 
 		for (var name in listeners) {
 			element.addEventListener(name, listeners[name])
+            this[symbols.addDisposable](() => element.removeEventListener(name, listeners[name]))
 		}
 	}
 
@@ -189,11 +207,9 @@ export default class EtchComponent
 			window.addEventListener('keydown', monitorKeyboard, true)
 			window.addEventListener('keyup', monitorKeyboard, true);
 
-			this[symbols.listen]({
-				dispose: () => {
-					window.removeEventListener('keydown', monitorKeyboard,)
-					window.removeEventListener('keyup', monitorKeyboard)
-				}
+			this[symbols.addDisposable](() => {
+				window.removeEventListener('keydown', monitorKeyboard,)
+				window.removeEventListener('keyup', monitorKeyboard)
 			})
 		}
 

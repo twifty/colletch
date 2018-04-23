@@ -8,9 +8,11 @@ export default {
 
 	initialize: Symbol(),
 
-	listen: Symbol(),
+    addDisposable: Symbol(),
 
 	emit: Symbol(),
+
+	addEventListener: Symbol(),
 
 	addEventListeners: Symbol(),
 
