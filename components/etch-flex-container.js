@@ -307,7 +307,11 @@ export default class EtchFlexContainer extends EtchComponent
 
 	[computeFlexData] () {
 		if (this[symbols.self].flexData && this[symbols.self].flexData.length === this[symbols.self].children.length) {
-			return this[symbols.self].flexData
+            const total = this[symbols.self].flexData.reduce((t, v) => t - v, 1.0)
+
+            if (Math.abs(total) < Number.EPSILON) {
+                return this[symbols.self].flexData
+            }
 		}
 
 		const pixelFlex = this[computePixelFlex]()
