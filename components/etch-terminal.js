@@ -467,6 +467,10 @@ export default class EtchTerminal extends EtchComponent
         if (this[symbols.self].properties.onInput) {
             this.on('input', this[symbols.self].properties.onInput)
         }
+
+        if (false === this[symbols.self].properties.showCursor) {
+            this.hideCursor()
+        }
     }
 
     update () {
@@ -478,6 +482,10 @@ export default class EtchTerminal extends EtchComponent
             this[resetData]()
 
             etch.updateSync(this)
+
+            if (false === this[symbols.self].properties.showCursor) {
+                return this.hideCursor()
+            }
         })
     }
 

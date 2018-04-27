@@ -306,9 +306,9 @@ export default class EtchFlexContainer extends EtchComponent
     }
 
     [computeFlexData] () {
-        if (this[symbols.self].flexData && this[symbols.self].flexData.length === this[symbols.self].children.length) {
-            return this[symbols.self].flexData
-        }
+        // if (this[symbols.self].flexData && this[symbols.self].flexData.length === this[symbols.self].children.length) {
+        //     return this[symbols.self].flexData
+        // }
 
         const pixelFlex = this[computePixelFlex]()
 
@@ -330,6 +330,18 @@ export default class EtchFlexContainer extends EtchComponent
             }, 0)
         }
 
+        const previousFlex = (props) => {
+            if (null !== props.key && this[symbols.self].flexData) {
+                for (const flexData of this[symbols.self].flexData) {
+                    if (flexData.key === props.key) {
+                        return flexData.flex
+                    }
+                }
+            }
+
+            return props.flex || 0
+        }
+
         const flexDataInit = this[symbols.self].children.map((child) => {
             const props = child.props || {}
 
@@ -338,8 +350,9 @@ export default class EtchFlexContainer extends EtchComponent
                 sizeFlex: (props.size || Number.MAX_VALUE) * pixelFlex,
                 minFlex: (props.minSize || 1) * pixelFlex,
                 constrained: props.flex !== undefined,
-                flex: props.flex || 0,
-                isSplitter: child.tag === EtchFlexSplitter
+                flex: previousFlex(props),
+                key: props.key,
+                isSplitter: child.tag === EtchFlexSplitter,
             }
         })
 
@@ -373,7 +386,8 @@ export default class EtchFlexContainer extends EtchComponent
 
         return flexData.map((entry) => {
             return {
-                flex: !entry.isSplitter ? entry.flex : 0.0
+                flex: !entry.isSplitter ? entry.flex : 0.0,
+                key: entry.key
             }
         })
     }
