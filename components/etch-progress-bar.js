@@ -7,38 +7,38 @@ import EtchComponent from './etch-component'
 import symbols from './symbols'
 
 function toNumber(num, def = 0) {
-	num = parseFloat(num)
-	return !Number.isNaN(num) && Number.isFinite(num) ? num : def
+    num = parseFloat(num)
+    return !Number.isNaN(num) && Number.isFinite(num) ? num : def
 }
 
 export default class EtchProgressBar extends EtchComponent
 {
-	[symbols.getDefaultProperties] () {
-		return {
-			total: 0,
-			complete: 0,
-		}
-	}
+    [symbols.getDefaultProperties] () {
+        return {
+            total: 0,
+            complete: 0,
+        }
+    }
 
-	update (properties) {
-		this[symbols.self].properties.total = properties.total
-		this[symbols.self].properties.complete = properties.complete
-		this[symbols.self].properties.label = properties.label
+    update (properties) {
+        this[symbols.self].properties.total = properties.total
+        this[symbols.self].properties.complete = properties.complete
+        this[symbols.self].properties.label = properties.label
 
-		return etch.update(this)
-	}
+        return etch.update(this)
+    }
 
-	render () {
-		const total = toNumber(this[symbols.self].properties.total, 0)
-		const width = Math.max(0, Math.min(total, toNumber(this[symbols.self].properties.complete, 0)))
-		const percent = (total ? Math.floor((width / total) * 100) : 0)
-		const label = typeof this[symbols.self].properties.label === 'string' ? this[symbols.self].properties.label : (percent + '%')
+    render () {
+        const total = toNumber(this[symbols.self].properties.total, 0)
+        const width = Math.max(0, Math.min(total, toNumber(this[symbols.self].properties.complete, 0)))
+        const percent = (total ? Math.floor((width / total) * 100) : 0)
+        const label = typeof this[symbols.self].properties.label === 'string' ? this[symbols.self].properties.label : (percent + '%')
 
-		return (
-			<div dataset={ {width, total, percent} } className={ this[symbols.getClassName]("etch-progress-bar", total ? null : 'empty')} >
-				<div className="complete" style={ {width: percent + '%'} }></div>
-				<span className="label">{ label }</span>
-			</div>
-		)
-	}
+        return (
+            <div dataset={ {width, total, percent} } className={ this[symbols.getClassName]("etch-progress-bar", total ? null : 'empty')} >
+                <div className="complete" style={ {width: percent + '%'} }></div>
+                <span className="label">{ label }</span>
+            </div>
+        )
+    }
 }

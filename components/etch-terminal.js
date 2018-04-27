@@ -460,8 +460,8 @@ export default class EtchTerminal extends EtchComponent
     constructor () {
         super(...arguments)
 
-        if (this[symbols.self].properties.onPreRenderLine) {
-            this.on('pre-render-line', this[symbols.self].properties.onPreRenderLine)
+        if (this[symbols.self].properties.onRender) {
+            this.on('render', this[symbols.self].properties.onRender)
         }
 
         if (this[symbols.self].properties.onInput) {
@@ -575,15 +575,87 @@ export default class EtchTerminal extends EtchComponent
     }
 
     showCursor () {
-        const element = this[symbols.self].cursor.getElement()
+        return this[symbols.scheduleUpdate](() => {
+            const element = this[symbols.self].cursor.getElement()
 
-        element.style.display = 'initial'
+            element.style.display = 'initial'
+        })
     }
 
     hideCursor () {
-        const element = this[symbols.self].cursor.getElement()
+        return this[symbols.scheduleUpdate](() => {
+            const element = this[symbols.self].cursor.getElement()
 
-        element.style.display = 'none'
+            element.style.display = 'none'
+        })
+    }
+
+    replaceNode (span, nodes) {
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes]
+        }
+
+        const idx = nodes.indexOf(span)
+        if (-1 !== idx) {
+            if (typeof span.cloneNode !== 'function') {
+                throw new Error('Given span is not clonable')
+            }
+
+            nodes[idx] = span.cloneNode(true)
+        }
+
+        let lineElement = null
+
+        if (span.parentNode && span.dataset && /^\d+$/.test(span.dataset.length)) {
+            for (const li of this.refs.list.childNodes) {
+                if (span.parentNode === li && li.contains(span)) {
+                    lineElement = li
+                    break
+                }
+            }
+        }
+
+        let cursorElement = this[symbols.self].cursor.getElement()
+
+        if (!lineElement || span === cursorElement) {
+            throw new Error('Given span does not belong to list')
+        }
+
+        if (lineElement === cursorElement.parentNode) {
+            let next = span
+            while (next) {
+                if (next === cursorElement) {
+                    break
+                }
+                next = next.nextSibling
+            }
+            if (!next) {
+                cursorElement = null
+            }
+        } else {
+            cursorElement = null
+        }
+
+        let lineLength = parseInt(lineElement.dataset.length)
+        let cursorOffset = parseInt(span.dataset.length)
+
+        for (const node of nodes) {
+            const nodeLength = node.textContent.length
+
+            node.dataset.length = nodeLength
+            lineLength += nodeLength
+            cursorOffset -= nodeLength
+
+            lineElement.insertBefore(node, span)
+        }
+
+        lineLength -= parseInt(span.dataset.length)
+        lineElement.dataset.length = lineLength
+        lineElement.removeChild(span)
+
+        if (cursorElement) {
+            this[symbols.self].cursor.column -= cursorOffset
+        }
     }
 
     render () {
@@ -632,7 +704,14 @@ export default class EtchTerminal extends EtchComponent
     }
 
     [insert] (text) {
-        this[symbols.self].cursor.write(text)
+        const span = this[symbols.self].cursor.write(text)
+
+        this[symbols.emit]('render', {
+            component: this,
+            list: this.refs.list,
+            line: this[cursorLineElement](),
+            span: span
+        })
     }
 
     [cursorLineElement] () {

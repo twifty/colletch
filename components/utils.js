@@ -2,121 +2,121 @@
 /* global Symbol console */
 
 export function getType(data) {
-	return Object.prototype.toString.call(data).toLowerCase().slice(8, -1)
+    return Object.prototype.toString.call(data).toLowerCase().slice(8, -1)
 }
 
 export function innerText(virtualNode) {
-	if (!virtualNode) {
-		throw new Error('Cannot traverse null or undefined!')
-	}
+    if (!virtualNode) {
+        throw new Error('Cannot traverse null or undefined!')
+    }
 
-	if (virtualNode.text) {
-		return virtualNode.text
-	}
+    if (virtualNode.text) {
+        return virtualNode.text
+    }
 
-	let text = ''
+    let text = ''
 
-	if (Array.isArray(virtualNode.children)) {
-		for (const child of virtualNode.children) {
-			text += innerText(child)
-		}
-	}
+    if (Array.isArray(virtualNode.children)) {
+        for (const child of virtualNode.children) {
+            text += innerText(child)
+        }
+    }
 
-	return text
+    return text
 }
 
 export function clone(data) {
-	const type = getType(data)
-	switch (type) {
-		case 'boolean':
-		case 'null':
-		case 'undefined':
-		case 'number':
-		case 'string':
-		case 'function':
-			return data
-		case 'map':
-		case 'weakmap':
-		case 'set':
-		case 'date':
-			return new data.constructor(...data)
-		case 'array':
-			return data.map(value => {
-				return clone(value)
-			})
-		case 'object':
-			if ('Object' === data.constructor.name) {
-				const result = {}
-				for (const key in data) {
-					result[key] = clone(data[key])
-				}
-				return result
-			}
-			for (const method of['clone', 'cloneNode']) {
-				if (data[method] && typeof data[method] === 'function') {
-					return data[method].call(data[method])
-				}
-			}
-			// An instantiated object
-			return data
-		default:
-			console.log(`Trying to clone unrecognized type '${type}' with constructor '${data.constructor}'`)
-			return data
-	}
+    const type = getType(data)
+    switch (type) {
+        case 'boolean':
+        case 'null':
+        case 'undefined':
+        case 'number':
+        case 'string':
+        case 'function':
+            return data
+        case 'map':
+        case 'weakmap':
+        case 'set':
+        case 'date':
+            return new data.constructor(...data)
+        case 'array':
+            return data.map(value => {
+                return clone(value)
+            })
+        case 'object':
+            if ('Object' === data.constructor.name) {
+                const result = {}
+                for (const key in data) {
+                    result[key] = clone(data[key])
+                }
+                return result
+            }
+            for (const method of['clone', 'cloneNode']) {
+                if (data[method] && typeof data[method] === 'function') {
+                    return data[method].call(data[method])
+                }
+            }
+            // An instantiated object
+            return data
+        default:
+            console.log(`Trying to clone unrecognized type '${type}' with constructor '${data.constructor}'`)
+            return data
+    }
 }
 
 export function makeObjectIterable(data) {
-	if (null == data) {
-		data = {}
-	}
+    if (null == data) {
+        data = {}
+    }
 
-	if (!data[Symbol.iterator]) {
-		data[Symbol.iterator] = function* () {
-			for (let key of Object.keys(data)) {
-				yield data[key]
-			}
-		}
-	}
+    if (!data[Symbol.iterator]) {
+        data[Symbol.iterator] = function* () {
+            for (let key of Object.keys(data)) {
+                yield data[key]
+            }
+        }
+    }
 
-	return data
+    return data
 }
 
 export function* splitStrings(data) {
-	if (Array.isArray(data)) {
-		for (const item of data) {
-			yield* splitStrings(item)
-		}
-	} else {
-		data = data.split(/\s+/)
+    if (Array.isArray(data)) {
+        for (const item of data) {
+            yield* splitStrings(item)
+        }
+    } else {
+        data = data.split(/\s+/)
 
-		for (const item of data) {
-			if (item) {
-				yield item
-			}
-		}
-	}
+        for (const item of data) {
+            if (item) {
+                yield item
+            }
+        }
+    }
 }
 
 export function camelCase(str) {
-	return str.replace(/-([a-z])/g, (g) => {
-		return g[1].toUpperCase()
-	})
+    return str.replace(/-([a-z])/g, (g) => {
+        return g[1].toUpperCase()
+    })
 }
 
 export function toArray(...values) {
-	let a = []
+    let a = []
 
-	for (let i = 0; i < values.length; i++) {
-		const value = values[i]
+    for (let i = 0; i < values.length; i++) {
+        const value = values[i]
 
-		if (value) {
-			if (!Array.isArray(value)) {
-				a = a.concat(value.split(' '))
-			} else {
-				a = a.concat(value)
-			}
-		}
-	}
+        if (value) {
+            if (!Array.isArray(value)) {
+                a = a.concat(value.split(' '))
+            } else {
+                a = a.concat(value)
+            }
+        }
+    }
 
-	return a
+    return a
 }

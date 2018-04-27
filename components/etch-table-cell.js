@@ -8,33 +8,33 @@ import symbols from './symbols'
 
 export default class EtchTableCell extends EtchComponent
 {
-	getFields () {
-		const props = this[symbols.self].properties
-		const fields = {}
+    getFields () {
+        const props = this[symbols.self].properties
+        const fields = {}
 
-		if (props[':fieldNames'] && 0 !== props[':fieldNames'].length) {
-			for (const name of props[':fieldNames']) {
-				fields[name] = props[name]
-			}
-		} else {
-			return props[':fieldData']
-		}
+        if (props[':fieldNames'] && 0 !== props[':fieldNames'].length) {
+            for (const name of props[':fieldNames']) {
+                fields[name] = props[name]
+            }
+        } else {
+            return props[':fieldData']
+        }
 
-		return fields
-	}
+        return fields
+    }
 
-	render () {
-		const fields = this.getFields()
-		const content = []
+    render () {
+        const fields = this.getFields()
+        const content = []
 
-		for (const value of Object.values(fields)) {
-			content.push(<span>{value}</span>)
-		}
+        for (const value of Object.values(fields)) {
+            content.push(<span>{value}</span>)
+        }
 
-		if (1 === content.length) {
-			return content[0]
-		}
+        if (1 === content.length) {
+            return content[0]
+        }
 
-		return <span>{content}</span>
-	}
+        return <span>{content}</span>
+    }
 }
