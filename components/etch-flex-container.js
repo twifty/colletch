@@ -305,12 +305,77 @@ export default class EtchFlexContainer extends EtchComponent
         return delta ? (1.0 / delta) : 0.0
     }
 
-    [computeFlexData] () {
-        // if (this[symbols.self].flexData && this[symbols.self].flexData.length === this[symbols.self].children.length) {
-        //     return this[symbols.self].flexData
-        // }
+    initialFlex () {
+        let additions = 1
+        let subtractions = 0
+
+        if (!Array.isArray(this[symbols.self].flexData) || 1 - Math.abs(this[symbols.self].flexData.reduce((t, v) => t + v.flex, 0)) > Number.EPSILON) {
+            this[symbols.self].flexData = []
+        }
+
+        // this[symbols.self].flexData = []
+
+        const childrenDenominator = this[symbols.self].children.reduce((total, child) => {
+            return total + (child.props && child.props.flex || 0)
+        }, 0)
+
+        for (const child of this[symbols.self].children) {
+            if (!child.props) {
+                child.props = {}
+            }
+
+            let flex = null
+
+            if (null !== child.props.key && this[symbols.self].flexData) {
+                for (const flexData of this[symbols.self].flexData) {
+                    if (flexData.key === child.props.key) {
+                        const value = flexData.flex
+
+                        subtractions += value
+
+                        flex = () => {
+                            return value * additions / subtractions
+                        }
+                    }
+                }
+            }
+
+            if (null === flex) {
+                if (child.props.flex != null) {
+                    const value = child.props.flex / childrenDenominator
+
+                    additions -= value
+
+                    flex = () => value
+                } else {
+                    flex = () => null
+                }
+            }
+
+            child.props.flex = flex
+        }
 
         const pixelFlex = this[computePixelFlex]()
+
+        return this[symbols.self].children.map((child) => {
+            const props = child.props
+
+            props.flex = props.flex()
+
+            return {
+                maxFlex: (props.maxSize || Number.MAX_VALUE) * pixelFlex,
+                sizeFlex: (props.size || Number.MAX_VALUE) * pixelFlex,
+                minFlex: (props.minSize || 1) * pixelFlex,
+                constrained: props.flex !== null, // Indicates if flex needs calculating
+                flex: props.flex,
+                key: props.key,
+                isSplitter: child.tag === EtchFlexSplitter,
+            }
+        })
+    }
+
+    [computeFlexData] () {
+        const flexDataInit = this.initialFlex()
 
         const computeFreeFlex = (flexData) => {
             return flexData.reduce((sum, entry) => {
@@ -321,6 +386,7 @@ export default class EtchFlexContainer extends EtchComponent
             }, 1)
         }
 
+        // Counts the resizable elements
         const computeFreeElements = (flexData) => {
             return flexData.reduce((sum, entry) => {
                 if (!entry.isSplitter && !entry.constrained) {
@@ -330,44 +396,24 @@ export default class EtchFlexContainer extends EtchComponent
             }, 0)
         }
 
-        const previousFlex = (props) => {
-            if (null !== props.key && this[symbols.self].flexData) {
-                for (const flexData of this[symbols.self].flexData) {
-                    if (flexData.key === props.key) {
-                        return flexData.flex
-                    }
-                }
-            }
-
-            return props.flex || 0
-        }
-
-        const flexDataInit = this[symbols.self].children.map((child) => {
-            const props = child.props || {}
-
-            return {
-                maxFlex: (props.maxSize || Number.MAX_VALUE) * pixelFlex,
-                sizeFlex: (props.size || Number.MAX_VALUE) * pixelFlex,
-                minFlex: (props.minSize || 1) * pixelFlex,
-                constrained: props.flex !== undefined,
-                flex: previousFlex(props),
-                key: props.key,
-                isSplitter: child.tag === EtchFlexSplitter,
-            }
-        })
-
+        // When an entry cannot grow/shrink it becomes constained. The other entries
+        // need to be recalculated to account for this, hence the recursion.
+        let recursionCount = 0
         const computeFlexDataRec = (flexDataIn) => {
             let hasContrain = false
             const freeElements = computeFreeElements(flexDataIn)
             const freeFlex = computeFreeFlex(flexDataIn)
+
+            if (recursionCount++ > 20) {
+                throw new Error('Too many recursions')
+            }
+
             const flexDataOut = flexDataIn.map((entry) => {
                 if (entry.isSplitter) {
                     return entry
                 }
 
-                const proposedFlex = !entry.constrained
-                    ? freeFlex / freeElements
-                    : entry.flex
+                const proposedFlex = !entry.constrained ? freeFlex / freeElements : entry.flex
                 const constrainedFlex = Math.min(entry.sizeFlex, Math.min(entry.maxFlex, Math.max(entry.minFlex, proposedFlex)))
                 const constrained = (constrainedFlex !== proposedFlex)
 
